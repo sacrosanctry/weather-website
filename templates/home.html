@@ -1,0 +1,107 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    
+    <!-- <link rel="stylesheet" type="text/css" href="/static/css/home.css?" {% now "U" %}> -->
+    <link rel="stylesheet" type="text/css" href="{% static '/css/home.css' %}">
+    
+    <title>Weather</title>
+    <link rel="shortcut icon" href="/static/icons/sun-256.ico" type="image/x-icon">
+</head>
+
+<body>
+    {% include 'navbar.html' %}
+
+    {% for msg in messages %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert"> <!--message for registration-->
+        <strong>Success!</strong> Indicates a successful or positive action.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
+    </div>
+    {% endfor %}
+
+    {% if not_chosen_error == True %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>Error.</strong> Choose the city and date.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
+    </div>
+    {% endif %}
+    
+    {% if date_not_exist_error == True %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>Sorry!</strong> The weather for the selected date does not exist.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
+    </div>
+    {% endif %}
+    
+    
+    <p></p>
+    <h1 class="center">Weather forecast in Ukraine</h1>
+    <br>
+
+    <form class="center" name="city" method="POST">
+        {% csrf_token %}
+        <p class="inline">Choose your city and date:</p>
+        <select class="inline" id="city" name="city" >
+            <option selected disabled="true"> City </option>
+            {% for city in cities %}
+                <option value="{{city.name}}" name="city">{{city.name}}</option>
+            {% endfor %}
+        </select>
+
+        <select class="inline" id="date" name="date" > 
+            <option selected disabled="true"> Date </option>
+            {% for date in dates %}
+                <option value="{{date.date}}" name="date">{{date.date}}</option>
+            {% endfor %}
+        </select>
+
+        {% csrf_token %}
+        <p></p> <!--onchange - send request to the server on the change of select box option-->
+        <input class="btn btn-outline-info" type="submit" value="Submit" onchange="this.form.submit();"> 
+    </form>
+    
+        
+    {% if place.name != 0 and filtered_allweather != None and date_not_exist_error != True %}
+    <br>
+    <h1 class="center">{{ place.name }}</h1>
+    <p></p>
+    <table class="table_center">
+        <tbody>
+            <tr>
+                {% for w in filtered_allweather %}
+                    <td align="center" width="140">
+                        <p class="temperature">{{ w.temperature }}°</p>
+                        <img src="/static/icons/{{ w.weather }}.svg" class="svg" fill="white" height="100" vertical-align="middle" width="100">
+                        <p>{{ w.weather }}</p>
+                        <p>{{ w.date }}</p>
+                        {% if user.is_active %}
+                        <p>{{ w.humidity }}
+                            <img src="/static/icons/water-128.ico" class="ico" fill="white" height="20" vertical-align="middle" width="20">
+                        </p>
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+            
+        </tbody>
+    </table>
+    {% if user.is_active %}
+    <br><p class="center">The gap between the warmest and coldest day of the month is {{ min_max_temp_gap }}°</p>
+    {% endif %}
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.5/dist/umd/popper.min.js"
+        integrity="sha384-Xe+8cL9oJa6tN/veChSP7q+mnSPaj5Bcu9mPX5F5xIGE0DVittaqT5lorf0EI7Vk"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.min.js"
+        integrity="sha384-kjU+l4N0Yf4ZOJErLsIcvOU2qSb74wXpOhqTvwVx3OElZRweTnQ6d31fXEoRD1Jy"
+        crossorigin="anonymous"></script>
+</body>
+</html>
